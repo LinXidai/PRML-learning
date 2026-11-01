@@ -1,0 +1,71 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[a4paper,margin=2.2cm,top=2.4cm,bottom=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\begin{document}
+\begin{center}
+\textbf{Homework 01}\\
+Xidai Lin
+\end{center}
+\section*{1.10}
+suppose x and z are continuous random variables, and the density function of x is $f(x)$ and the density function of z is $g(z)$. 
+Since x and z are independent, the joint density function of x and z is $f(x)g(z)$. Then we have
+\begin{align*}
+ E(x+z)&=\int \int (x+z) f(x) g(z) dx dz = \int \int x f(x) g(z) dx dz + \int \int z f(x) g(z) dx dz \\
+&=\int xf(x)dx\int g(z)dz+\int f(x)dx \int z g(z)dz = E(x)+E(z)   
+\end{align*}
+\[
+E(xz)=\int \int xzf(x)g(z) dxdz =\int xf(x) dx \int zg(z) dz=E(x)E(z)
+\]
+Hence, we have
+\[
+Var(x+z)=E((x+z)^2)-E^2(x+z)=E(x^2)+2E(x)E(z)+E(z^2)-E^2(x)-2E(x)E(z)-E^2(z)=Var(x)+Var(z)
+\]
+\begin{remark}
+    Actually,$E(x+z)=E(x)+E(z)$ is trus for any random variables x and z, so$E(x^2+2xz+z^z)=E(x^2)+2E(x)E(z)+E(z^2)$ is also true for any random variables x and z.
+\end{remark}
+\section*{1-11}
+(1.55)
+\[
+\frac{d}{d \mu}ln(p|\mu,\sigma^2)=\frac{1}{\sigma^2}\sum_{i=1}^{n}(x_i-\mu)=0
+\]
+\[
+N\mu=\sum_{i=1}^{N} x_i
+\]
+\[
+\mu = \frac{1}{N}\sum_{i=1}^{N} x_i
+\]
+(1.56)
+\[
+\frac{d}{d \sigma^2}ln(p|\mu,\sigma^2)=-\frac{N}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^{N}(x_i-\mu)^2=0
+\]
+\[
+\sigma^2=\frac{1}{N}\sum_{n=1}^{N} (x_n-\mu_{ML})^2
+\]
+\section*{1-12}
+if n=m,
+by (1.50)
+\[
+E(x_n,x_m)=E(x^2)=\mu^2+\sigma^2=E(x^2)=\mu^2+I_{n \, m}\sigma^2
+\]
+if $ n \neq m$, by (1.49) and (1-10)
+\[
+E(x_n,x_m)=E(x_n)E(x_m)=\mu^2=E(x^2)+I_{n \, m}\sigma^2
+\]
+Proof of (1.57),
+\[
+E(\mu_{ML})=\frac{1}{N}E(\sum_{i=1}^{N}x_i)=\frac{1}{N}\sum_{i=1}^{N}E(x_i)=\frac{1}{N}\sum_{i=1}^{N}\mu=\mu
+\]
+Proof of (1.58),
+\[
+E(\mu_{ML}^2)=\frac{1}{N^2}E(\sum_{n=1}^{N}x_n)^2=\frac{1}{N^2}E(\sum_{n=1}^{N}x_n^2+\sum_{n=1}^{N}\sum_{m \neq n}x_nx_m)=\frac{1}{N^2}(N(\mu^2+\sigma^2)+N(N-1)\mu^2)=\mu^2+\frac{\sigma^2}{N} 
+\]
+\begin{align*}  
+E(\sigma^2_{ML}) &=E(\frac{1}{N}\sum_{n=1}^{N}(x_n-\mu_{ML})^2)=\frac{1}{N}\sum_{n=1}^{N}E((x_n-\mu_{ML})^2) \\
+&=\frac{1}{N}\sum_{n=1}^{N}[E(x_n^2)-\frac{1}{N}E(2x_n(\sum_{i=1,i\neq n}^{N}x_i)-\frac{2}{N}E(x_n^2)+E(\mu_{ML}^2))] \\
+&=\frac{1}{N}\{(N-2)(\mu^2+\sigma^2)-2(N-1)\mu^2+N\mu^2+N\frac{\sigma^2}{N}\} \\
+&=\frac{N-1}{N}\sigma^2
+\end{align*}
+\end{document}
