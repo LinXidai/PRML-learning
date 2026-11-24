@@ -1,0 +1,122 @@
+<section id="dirichlet-simplex">
+  <h2>三分类概率向量的抽样</h2>
+  <div class="viz-controls">
+    <label class="form-label">
+      参数 α
+      <select class="form-select">
+        <option value="0.2,0.2,0.2">(0.2, 0.2, 0.2)</option>
+        <option value="1,1,1" selected>(1, 1, 1)</option>
+        <option value="10,10,10">(10, 10, 10)</option>
+        <option value="8,2,2">(8, 2, 2)</option>
+      </select>
+    </label>
+  </div>
+  <div class="simplex-plot" role="img" aria-label="三角形中的 Dirichlet 样本，三个顶点分别对应 A、B、C 的概率为 100%">
+    <div class="simplex-top-label">A = 100%</div>
+    <svg viewBox="-2 -2 272 236" width="272" height="236" aria-hidden="true">
+      <path class="simplex-samples" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+        d="
+        M129.8 43.7h.01 M143.0 222.5h.01 M73.0 205.8h.01 M99.1 186.9h.01 M100.0 159.4h.01 M101.9 154.7h.01 M96.9 98.6h.01 M143.1 82.8h.01 M226.9 207.9h.01 M239.6 195.6h.01 M167.7 114.1h.01 M89.8 125.1h.01
+        M141.6 69.6h.01 M56.2 188.3h.01 M95.4 179.8h.01 M83.7 177.8h.01 M150.7 40.5h.01 M254.3 231.8h.01 M183.8 191.7h.01 M197.0 158.2h.01 M150.6 111.1h.01 M241.6 200.5h.01 M86.7 86.4h.01 M102.6 130.6h.01
+        M140.5 124.7h.01 M121.2 66.1h.01 M141.4 70.0h.01 M148.6 199.8h.01 M161.1 195.3h.01 M214.4 165.3h.01 M176.5 100.8h.01 M152.6 78.6h.01 M138.5 179.4h.01 M141.5 135.0h.01 M164.3 160.3h.01 M104.8 160.0h.01
+        M121.8 104.6h.01 M88.9 160.9h.01 M98.8 65.6h.01 M75.9 197.1h.01 M104.1 114.1h.01 M167.6 171.3h.01 M174.8 193.0h.01 M176.6 81.0h.01 M165.7 55.5h.01 M119.1 117.6h.01 M248.4 218.6h.01 M131.7 85.1h.01
+        M187.3 176.4h.01 M131.2 100.1h.01 M118.5 113.5h.01 M39.7 171.4h.01 M108.7 72.1h.01 M246.5 206.2h.01 M175.2 115.5h.01 M221.1 222.0h.01 M255.5 214.3h.01 M136.1 202.8h.01 M97.9 69.2h.01 M67.5 134.6h.01
+        M65.0 154.0h.01 M236.8 195.6h.01 M93.3 95.0h.01 M174.7 165.4h.01 M136.1 26.8h.01 M101.3 79.2h.01 M57.2 162.3h.01 M143.1 80.3h.01 M169.5 130.3h.01 M166.0 185.8h.01 M95.4 212.6h.01 M129.2 171.8h.01
+        M87.9 166.9h.01 M166.4 197.7h.01 M156.4 204.8h.01 M41.6 216.3h.01 M135.5 215.9h.01 M188.9 164.7h.01 M104.6 156.0h.01 M142.1 97.5h.01 M141.3 89.6h.01 M120.7 41.9h.01 M181.3 104.2h.01 M107.7 108.8h.01
+        M232.0 228.4h.01 M156.6 211.9h.01 M125.1 16.2h.01 M145.1 137.3h.01 M81.5 211.5h.01 M47.7 200.6h.01 M47.9 196.1h.01 M219.7 205.0h.01 M153.8 48.7h.01 M161.3 72.1h.01 M171.7 79.7h.01 M105.1 92.1h.01
+        "></path>
+      <polygon class="simplex-frame" points="134,0 0,232 268,232" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"></polygon>
+    </svg>
+    <div class="simplex-base-labels"><span>B = 100%</span><span>C = 100%</span></div>
+  </div>
+  <p aria-live="polite" class="text-small tabular-nums">均值（A, B, C）为（33.3%，33.3%，33.3%） · α₀ = 3</p>
+</section>
+<style>
+  #dirichlet-simplex { display: grid; gap: calc(var(--font-size-base, 1rem) * .5); }
+  #dirichlet-simplex .simplex-plot { width: 100%; max-width: 352px; margin-inline: auto; }
+  #dirichlet-simplex .simplex-top-label { text-align: center; }
+  #dirichlet-simplex .simplex-base-labels { display: flex; justify-content: space-between; }
+  #dirichlet-simplex .simplex-base-labels span { width: 80px; text-align: center; }
+  #dirichlet-simplex .simplex-plot svg { display: block; width: calc(100% - 80px); height: auto; margin-inline: auto; }
+  #dirichlet-simplex .simplex-frame { stroke: var(--muted-foreground, currentColor); }
+  #dirichlet-simplex .simplex-samples {
+    stroke: var(--viz-series-1, var(--blue, currentColor));
+    opacity: .7;
+  }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('dirichlet-simplex');
+  const select = root.querySelector('select');
+  const points = root.querySelector('.simplex-samples');
+  const summary = root.querySelector('p');
+  const allowedValues = Array.from(select.options, option => option.value);
+  const sampleCache = new Map();
+
+  function uniform() {
+    return 1 - Math.random();
+  }
+
+  function gamma(shape) {
+    if (shape < 1) {
+      return gamma(shape + 1) * Math.pow(uniform(), 1 / shape);
+    }
+    const d = shape - 1 / 3;
+    const c = 1 / Math.sqrt(9 * d);
+    // Marsaglia–Tsang sampling with unit rate.
+    for (;;) {
+      const normal = Math.sqrt(-2 * Math.log(uniform())) * Math.cos(2 * Math.PI * uniform());
+      const base = 1 + c * normal;
+      if (base <= 0) continue;
+      const v = base ** 3;
+      if (Math.log(uniform()) < normal ** 2 / 2 + d * (1 - v + Math.log(v))) {
+        return d * v;
+      }
+    }
+  }
+
+  function getSamples(alpha) {
+    const key = alpha.join(',');
+    if (!sampleCache.has(key)) {
+      const samples = Array.from({ length: 1200 }, () => {
+        const draws = alpha.map(gamma);
+        const total = draws.reduce((sum, value) => sum + value, 0);
+        return draws.map(value => value / total);
+      });
+      sampleCache.set(key, samples);
+    }
+    return sampleCache.get(key);
+  }
+
+  function draw() {
+    const alpha = select.value.split(',').map(Number);
+    const total = alpha.reduce((sum, value) => sum + value, 0);
+    // Transform the probability vector using the SVG triangle's vertices.
+    const marks = getSamples(alpha).map(([a, , c]) => {
+      const x = 134 * a + 268 * c;
+      const y = 232 * (1 - a);
+      return `M ${x.toFixed(2)} ${y.toFixed(2)} h .01`;
+    });
+    points.setAttribute('d', marks.join(' '));
+    const mean = alpha.map(value => (100 * value / total).toFixed(1) + '%');
+    const description = `均值（A, B, C）为（${mean.join('，')}） · α₀ = ${Number(total.toPrecision(10))}`;
+    if (summary.textContent !== description) summary.textContent = description;
+  }
+
+  function restore(state) {
+    const value = state?.privateContent?.alpha;
+    if (allowedValues.includes(value)) select.value = value;
+    draw();
+  }
+
+  select.addEventListener('change', () => {
+    draw();
+    window.openai?.setWidgetState?.({
+      modelContent: { alpha: select.value.split(',').map(Number) },
+      privateContent: { alpha: select.value }
+    }).catch(() => {});
+  });
+  window.addEventListener('openai:set_globals', event => restore(event.detail?.globals?.widgetState));
+  restore(window.openai?.widgetState);
+})();
+</script>

@@ -1,0 +1,167 @@
+<section id="covariance-explorer">
+  <style>
+    #covariance-explorer { display: grid; gap: var(--font-size-base); }
+    #covariance-explorer .covariance-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+      gap: calc(var(--font-size-base) * .75);
+    }
+    #covariance-explorer .covariance-values {
+      display: grid;
+      grid-template-columns: repeat(2, 3.7em);
+      text-align: right;
+      column-gap: .55em;
+      border-inline: 1px solid var(--muted-foreground);
+      padding-inline: .35em;
+    }
+    #covariance-explorer .covariance-plot {
+      display: block;
+      width: 100%;
+      height: 335px;
+      color: var(--foreground);
+    }
+    #covariance-explorer .covariance-grid { stroke: var(--border); }
+    #covariance-explorer .covariance-axis { stroke: var(--muted-foreground); }
+    #covariance-explorer .covariance-points { fill: var(--viz-series-1); opacity: .64; }
+    #covariance-explorer .covariance-ellipse {
+      fill: none;
+      stroke: var(--viz-series-1);
+      stroke-width: 1.8;
+    }
+    #covariance-explorer .covariance-labels { fill: currentColor; }
+    @media (max-width: 420px) {
+      #covariance-explorer .covariance-plot { height: 280px; }
+    }
+  </style>
+  <h2>二维高斯点云</h2>
+  <div class="covariance-controls viz-controls">
+    <label class="form-label">X 的标准差 <output class="tabular-nums" for="covariance-x">1.40</output>
+      <input id="covariance-x" class="form-range" type="range" min=".25" max="2" step=".05" value="1.40">
+    </label>
+    <label class="form-label">Y 的标准差 <output class="tabular-nums" for="covariance-y">1.00</output>
+      <input id="covariance-y" class="form-range" type="range" min=".25" max="2" step=".05" value="1.00">
+    </label>
+    <label class="form-label">相关系数 ρ <output class="tabular-nums" for="covariance-rho">0.65</output>
+      <input id="covariance-rho" class="form-range" type="range" min="-1" max="1" step=".05" value=".65">
+    </label>
+  </div>
+  <div class="viz-row" aria-live="polite">
+    <span>协方差矩阵 Σ</span>
+    <div class="covariance-values tabular-nums" data-matrix></div>
+  </div>
+  <svg class="covariance-plot" role="img" aria-label="二维高斯点云与 90% 概率椭圆">
+    <g class="covariance-grid"></g>
+    <g class="covariance-axis"></g>
+    <g class="covariance-labels text-small"></g>
+    <g class="covariance-points"></g>
+    <path class="covariance-ellipse"></path>
+  </svg>
+  <script>
+    (() => {
+      const root = document.getElementById('covariance-explorer');
+      const inputs = [...root.querySelectorAll('input')];
+      const readouts = [...root.querySelectorAll('output')];
+      const matrix = root.querySelector('[data-matrix]');
+      const plot = root.querySelector('.covariance-plot');
+      const grid = root.querySelector('.covariance-grid');
+      const axes = root.querySelector('.covariance-axis');
+      const labels = root.querySelector('.covariance-labels');
+      const points = root.querySelector('.covariance-points');
+      const ellipse = root.querySelector('.covariance-ellipse');
+      const radius = Math.sqrt(-2 * Math.log(.1));
+      let seed = 240713;
+      const uniform = () => {
+        seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+        return (seed + .5) / 4294967296;
+      };
+      const sample = Array.from({ length: 280 }, () => {
+        const length = Math.sqrt(-2 * Math.log(uniform()));
+        const angle = 2 * Math.PI * uniform();
+        return [length * Math.cos(angle), length * Math.sin(angle)];
+      });
+      const outline = Array.from({ length: 100 }, (_, i) => {
+        const angle = 2 * Math.PI * i / 100;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
+      });
+      const line = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      const label = (x, y, text) => `<text x="${x}" y="${y}" text-anchor="middle">${text}</text>`;
+      const read = () => inputs.map(input => input.valueAsNumber);
+      const format = value => (Math.abs(value) < .005 ? 0 : value).toFixed(2);
+      let rendered = read();
+      let frame;
+
+      function draw([sx, sy, rho]) {
+        const {width, height} = plot.getBoundingClientRect();
+        if (!width || !height) return;
+        const extent = 8.5;
+        const scale = Math.min((width - 36) / 2, (height - 38) / 2) / extent;
+        const x = value => width / 2 + scale * value;
+        const y = value => (height - 4) / 2 - scale * value;
+        const ticks = [-8, -4, 4, 8];
+        grid.innerHTML = ticks.map(tick =>
+          line(x(tick), y(-extent), x(tick), y(extent)) +
+          line(x(-extent), y(tick), x(extent), y(tick))
+        ).join('');
+        axes.innerHTML = line(x(-extent), y(0), x(extent), y(0)) +
+          line(x(0), y(-extent), x(0), y(extent));
+        labels.innerHTML = ticks.map(tick =>
+          label(x(tick), y(-extent) + 17, tick) +
+          label(x(-extent) - 11, y(tick) + 4, tick)
+        ).join('') + label(x(extent) + 10, y(0) + 4, 'X') + label(x(0), y(extent) - 6, 'Y');
+        const independent = Math.sqrt(Math.max(0, 1 - rho * rho));
+        const project = ([u, v]) => [
+          x(sx * u).toFixed(2),
+          y(sy * (rho * u + independent * v)).toFixed(2)
+        ];
+        points.innerHTML = sample.map(point => {
+          const [cx, cy] = project(point);
+          return `<circle cx="${cx}" cy="${cy}" r="2.3"/>`;
+        }).join('');
+        ellipse.setAttribute('d', 'M' + outline.map(project).join(' L') + ' Z');
+      }
+
+      function update(animate) {
+        const target = read();
+        const [sx, sy, rho] = target;
+        const covariance = rho * sx * sy;
+        target.forEach((value, i) => { readouts[i].value = format(value); });
+        matrix.innerHTML = [sx * sx, covariance, covariance, sy * sy]
+          .map(value => `<span>${format(value)}</span>`).join('');
+        cancelAnimationFrame(frame);
+        if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          rendered = target;
+          draw(rendered);
+          return;
+        }
+        const previous = rendered;
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / 130, 1);
+          rendered = previous.map((value, i) => value + t * (target[i] - value));
+          draw(rendered);
+          if (t < 1) frame = requestAnimationFrame(step);
+        }
+        frame = requestAnimationFrame(step);
+      }
+
+      function restore(state) {
+        const values = state?.modelContent?.parameters;
+        if (Array.isArray(values) && values.length === inputs.length && values.every(Number.isFinite)) {
+          values.forEach((value, i) => { inputs[i].value = value; });
+        }
+        update(false);
+      }
+
+      root.addEventListener('input', () => update(true));
+      root.addEventListener('change', () => {
+        window.openai?.setWidgetState?.({modelContent: {parameters: read()}})?.catch(() => {});
+      });
+      window.addEventListener('openai:set_globals', event => {
+        const state = event.detail?.globals?.widgetState;
+        if (state) restore(state);
+      });
+      new ResizeObserver(() => draw(rendered)).observe(plot);
+      restore(window.openai?.widgetState);
+    })();
+  </script>
+</section>
